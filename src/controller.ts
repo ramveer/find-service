@@ -32,29 +32,37 @@ export const verifyOtp = async (req: Request, res: Response) => {
 
 // Broadcasts the location of a vehicle and handles errors
 export const postLocation = async (req: Request, res: Response) => {
+  console.log('postLocation endpoint called');
   try {
     const { lat, lng } = req.body;
+    console.log('Received location data:', { lat, lng, vehicleId: req.params.vehicleId });
     const vehicleId = req.params.vehicleId;
     if (!lat || !lng || !vehicleId) {
+      console.warn('Missing lat/lng/vehicleId:', { lat, lng, vehicleId });
       return res.status(400).json({ success: false, error: 'Latitude, longitude, and vehicle ID are required' });
     }
     await locationService.broadcastLocation(vehicleId, { lat, lng });
+    console.log('Location broadcasted for vehicle:', vehicleId);
     res.status(201).json({ success: true });
   } catch (e) {
+    console.error('Failed to broadcast location:', e);
     res.status(500).json({ success: false, error: 'Failed to broadcast location' });
   }
 };
 
 // Streams locations for a list of vehicle IDs using Server-Sent Events (SSE)
 export const streamLocations = (req: Request, res: Response) => {
+  console.log('streamLocations endpoint called');
   try {
     const vehicleIds = (req.query.v || '').toString().split(',').filter(id => id.trim() !== '');
+    console.log('Streaming locations for vehicle IDs:', vehicleIds);
     if (vehicleIds.length === 0) {
+      console.warn('No valid vehicle IDs provided');
       return res.status(400).json({ success: false, error: 'No valid vehicle IDs provided' });
     }
     locationService.setupSSE(vehicleIds, res);
   } catch (e) {
-    
+    console.error('Failed to stream locations:', e);
     res.status(500).json({ success: false, error: 'Failed to stream locations' });
   }
 };

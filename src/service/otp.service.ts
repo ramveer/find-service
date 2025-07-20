@@ -2,6 +2,7 @@ import * as userRepo from '../repository/user.repository';
 
 // Generate OTP
 async function generateOtp(userId: number, type: 'LOGIN' | 'PASSWORD_RESET') {
+  console.log('generateOtp called with:', { userId, type });
   const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // Expires in 5 minutes
 
@@ -14,12 +15,15 @@ async function generateOtp(userId: number, type: 'LOGIN' | 'PASSWORD_RESET') {
     },
   });
 
+  console.log('OTP generated and saved:', otp);
+
   // Send OTP via SMS (use your SMS utility)
   // sendSms(user.phone, `Your OTP is ${otp}`);
 }
 
 // Verify OTP
 async function verifyOtp(userId: number, inputOtp: string, type: 'LOGIN' | 'PASSWORD_RESET') {
+  console.log('verifyOtp called with:', { userId, inputOtp, type });
   const otpRecord = await userRepo.findOtpFirst({
     where: {
       userId,
@@ -31,6 +35,7 @@ async function verifyOtp(userId: number, inputOtp: string, type: 'LOGIN' | 'PASS
   });
 
   if (!otpRecord) {
+    console.warn('Invalid or expired OTP for:', { userId, inputOtp, type });
     throw new Error('Invalid or expired OTP.');
   }
 
@@ -48,5 +53,6 @@ async function verifyOtp(userId: number, inputOtp: string, type: 'LOGIN' | 'PASS
     });
   }
 
+  console.log('OTP verified successfully for:', userId);
   return 'OTP verified successfully.';
 }
