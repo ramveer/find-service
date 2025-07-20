@@ -1,0 +1,95 @@
+import { Request, Response } from 'express';
+import * as userService from './service/user.service';
+import * as locationService from './service/location.service';
+
+// Handles OTP request by delegating to the user service
+export const requestOtp = async (req: Request, res: Response) => {
+  try {
+    const { phone } = req.body;
+    if (!phone) {
+      return res.status(400).json({ success: false, error: 'Phone number is required' });
+    }
+    await userService.requestOtp(phone);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to request OTP' });
+  }
+};
+
+// Verifies the OTP and returns a token if successful
+export const verifyOtp = async (req: Request, res: Response) => {
+  try {
+    const { phone, otp } = req.body;
+    if (!phone || !otp) {
+      return res.status(400).json({ success: false, error: 'Phone and OTP are required' });
+    }
+    const token = await userService.verifyOtp(phone, otp);
+    res.json({ success: true, token });
+  } catch (e) {
+    res.status(401).json({ success: false, error: 'Invalid OTP' });
+  }
+};
+
+// Broadcasts the location of a vehicle and handles errors
+export const postLocation = async (req: Request, res: Response) => {
+  try {
+    const { lat, lng } = req.body;
+    const vehicleId = req.params.vehicleId;
+    if (!lat || !lng || !vehicleId) {
+      return res.status(400).json({ success: false, error: 'Latitude, longitude, and vehicle ID are required' });
+    }
+    await locationService.broadcastLocation(vehicleId, { lat, lng });
+    res.status(201).json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to broadcast location' });
+  }
+};
+
+// Streams locations for a list of vehicle IDs using Server-Sent Events (SSE)
+export const streamLocations = (req: Request, res: Response) => {
+  try {
+    const vehicleIds = (req.query.v || '').toString().split(',').filter(id => id.trim() !== '');
+    if (vehicleIds.length === 0) {
+      return res.status(400).json({ success: false, error: 'No valid vehicle IDs provided' });
+    }
+    locationService.setupSSE(vehicleIds, res);
+  } catch (e) {
+    
+    res.status(500).json({ success: false, error: 'Failed to stream locations' });
+  }
+};
+
+// Adds user details to the database
+export const addUserDetails = async (req: Request, res: Response) => {
+  try {
+    const { name, email, phone } = req.body;
+    if (!name || !email || !phone) {
+      return res.status(400).json({ success: false, error: 'Name, email, and phone are required' });
+    }
+    const user = await userService.addUserDetails({ name, email, phone });
+    res.status(201).json({ success: true, user });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to add user details' });
+  }
+};
+
+// Registers a device as private or public
+export const registerDevice = async (req: Request, res: Response) => {
+  try {
+    const { deviceId, type, owner } = req.body; // `type` can be 'private' or 'public'
+    if (!deviceId || !type) {
+      return res.status(400).json({ success: false, error: 'Device ID and type are required' });
+    }
+    if (type === 'private') {
+      const device = await userService.registerPrivateDevice({ deviceId, owner });
+      res.status(201).json({ success: true, device });
+    } else if (type === 'public') {
+      const device = await userService.registerPublicDevice({ deviceId });
+      res.status(201).json({ success: true, device });
+    } else {
+      res.status(400).json({ success: false, error: 'Invalid device type' });
+    }
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to register device' });
+  }
+};

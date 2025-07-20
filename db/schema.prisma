@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  name      String
+  phone     String  @unique
+  email     String
+  otp       String?
+  role      Role    @default(NORMAL)
+  isVerified  Boolean   @default(false) // Indicates if the user is verified
+  isActive    Boolean   @default(true)  // Indicates if the user account is active
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  NORMAL
+  DRIVER
+}
+
+model OTPCode {
+  id          Int      @id @default(autoincrement())
+  userId      Int      // Foreign key to the User table
+  user        User     @relation(fields: [userId], references: [id])
+  otp         String   // The OTP value
+  type        OtpType  // Type of OTP (e.g., LOGIN, PASSWORD_RESET)
+  expiresAt   DateTime // Expiration time for the OTP
+  isUsed      Boolean  @default(false) // Indicates if the OTP has been used
+  createdAt   DateTime @default(now())
+}
+
+enum OtpType {
+  LOGIN
+  PASSWORD_RESET
+}
+
+model TrackDevice {
+  id            Int      @id @default(autoincrement())
+  userId        Int      // can have multiple records for a single User
+  user          User     @relation(fields: [userId], references: [id])
+  name          String   @unique // can be vehicleNumber
+  deviceType    String
+  deviceNumber  String
+  shareType     SharingType @default(PRIVATE) // PRIVATE: restricted, PUBLIC: open to all
+  startLoc      String // only if public
+  endLoc        String // only if public
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum SharingType {
+  PUBLIC
+  PRIVATE
+}
+
+model Permissions {
+  id             Int      @id @default(autoincrement())
+  deviceId       Int
+  trackDevice    TrackDevice @relation(fields: [deviceId], references: [id])
+  allowedUserId  Int?     // User ID allowed to access the device
+  allowedPhone   String   // Phone number allowed to access the device
+  isActive       Boolean  @default(true) // Toggle permission without deleting
+  createdAt      DateTime @default(now())
+}
+
+
+
+
