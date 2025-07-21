@@ -1,29 +1,33 @@
-# Vehicle Tracking Platform — Project Summary
+# Vehicle Tracking Platform
 
-## 🧠 Purpose
-A real-time location tracking system for:
-- **Drivers** to share the location of buses/trucks.
-- **Users** (e.g., parents or fleet owners) to track one or many vehicles they have permission for.
+## Overview
 
-The platform is mobile-first, with OTP-based login using phone numbers.
+A real-time location tracking system designed for:
+- **Drivers**: Share the live location of buses or trucks.
+- **Users** (e.g., parents, fleet owners): Track one or more vehicles they have permission to access.
 
----
-
-## 🏗️ Architecture
-
-### 🧱 Tech Stack
-| Component          | Tech Used                          |
-|---------------------|------------------------------------|
-| Backend            | Node.js (TypeScript) + Express     |
-| Database           | MySQL (via Prisma ORM)             |
-| Auth               | JWT (Bearer Tokens)                |
-| Messaging (future) | Kafka (location ingestion)         |
-| Real-time          | Server-Sent Events (SSE)          |
-| Deployment         | Microservices w/ per-location DBs  |
+The platform is mobile-first and uses OTP-based login via phone numbers.
 
 ---
 
-## 📁 Project Structure
+## Architecture
+
+### Tech Stack
+
+| Component    | Technology                        |
+|--------------|-----------------------------------|
+| Backend      | Node.js (TypeScript), Express     |
+| Database     | MySQL (via Prisma ORM)            |
+| Auth         | JWT (Bearer Tokens)               |
+| Messaging    | Kafka (planned, for ingestion)    |
+| Real-time    | Server-Sent Events (SSE)          |
+| Deployment   | Microservices, per-location DBs   |
+
+---
+
+## Project Structure
+
+```
 project-root/
 ├── .env
 ├── package.json
@@ -33,7 +37,7 @@ project-root/
 │   └── schema.prisma         # Prisma schema
 └── src/
     ├── app.ts                # Entry point
-    ├── controller.ts         # All endpoint handlers
+    ├── controller.ts         # Endpoint handlers
     ├── routes/
     │   └── index.ts          # Route declarations
     ├── services/
@@ -44,72 +48,78 @@ project-root/
     └── utils/
         ├── util.ts
         └── sms.ts
+```
 
 ---
 
-## 🧩 Features & Modules
+## Features
 
-### ✅ OTP-based User Login API
+### OTP-based User Login
 
-### ✅ Authentication
-- OTP-based login using phone number (`POST /user/login/request-otp`).
-- Verifies OTP, issues JWT token (`POST /user/login/verify-otp`).
+- Request OTP using phone number (`POST /user/login/request-otp`)
+- Verify OTP and receive JWT token (`POST /user/login/verify-otp`)
 
-### ✅ Real-time Tracking - Use Google Geolocation API
-- Drivers share/send location (`POST /location/:vehicleId`).
-- Users stream live updates for 1 or more vehicles (`GET /location/stream?v=1,2,3`).
-~~- SSE (Server-Sent Events) used for low-latency, push-based streaming.~~
-- Public Vehicle:: user can search by location (`GET /vehicle/search?query=...`)  startLoc to endLoc,
-  it returns all vehicles current location live tracking in that range. it only works for public vehicles. it search only active vehicles.
+### Authentication
 
-### ✅ Vehicle Management -Search API
- - Users can search vehicles by name, phoneNumber or vehicleId/deviceNumber (`GET /vehicle/search?query=searchTerm`).
- - Search supports full matches on vehicle name, phone number, or device number.
- - Search is applicable to all Vehicle.
- - 
+- Secure endpoints using JWT tokens.
 
-### ✅ Permissions : Api to manage user permissions for Private vehicles/devices.
-- A user can subscribe to many vehicles.
-- Permissions stored in DB to validate access.
-- Only Private vehicles are required permission to see by other user.
+### Real-time Tracking
 
----
+- Drivers send location updates (`POST /location/:vehicleId`)
+- Users stream live location updates for one or more vehicles (`GET /location/stream?v=1,2,3`)
+- Public vehicles: Search by location (`GET /vehicle/search?query=...`) to get live tracking for vehicles in a specific range (only for public and active vehicles).
 
-## 🔐 User Model Design (Multi-DB Support)
+### Vehicle Management
+
+- Search vehicles by name, phone number, or device number (`GET /vehicle/search?query=searchTerm`)
+- Search supports exact matches and applies to all vehicles.
+
+### Permissions
+
+- Users can subscribe to multiple vehicles.
+- Permissions are stored in the database and validated for private vehicles.
+- Only private vehicles require explicit permission for access.
 
 ---
 
-## 🧪 API Testing Guide
+## User Model
+
+- Supports multi-database architecture.
+- User roles: NORMAL, DRIVER.
+- User status: Verified, Active.
+
+---
+
+## API Testing Guide
 
 ### Test Real-time Location Streaming (`/location/stream`)
 
 - **Endpoint:** `GET /location/stream`
-- **How to test in Postman:**
+- **How to test:**
   1. Set method to **GET**.
-  2. Set the URL to:  
+  2. Use URL:  
      ```
      http://localhost:PORT/location/stream?v=1,2,3
      ```
      Replace `PORT` with your server port and `1,2,3` with the vehicle IDs you want to stream.
-  3. **No request body is needed**.  
+  3. **No request body is needed**.
      Vehicle IDs are provided as a comma-separated list in the `v` query parameter.
-  4. Send the request.  
+  4. Send the request.
      You should see a stream of location updates (as SSE events) in the response.
 
 - **Note:**  
-  Postman may not display SSE events properly. For best results, use a browser or an SSE-compatible client.  
-  **SSE streaming works in browsers (e.g., Chrome, Firefox) and with EventSource in JavaScript. Postman does not support SSE.**
+  Postman does **not** support SSE. Use a browser or an SSE-compatible client (e.g., JavaScript `EventSource`).
 
 ### Test Posting Location (`/location/:vehicleId`)
 
 - **Endpoint:** `POST /location/:vehicleId`
-- **How to test in Postman:**
+- **How to test:**
   1. Set method to **POST**.
-  2. Set the URL to:  
+  2. Use URL:  
      ```
      http://localhost:PORT/location/123
      ```
-     Replace `PORT` with your server port and `123` with the vehicle ID you want to post location for.
+     Replace `PORT` with your server port and `123` with the vehicle ID.
   3. Set **Body** type to `raw` and select `JSON`.
   4. Provide a JSON body, for example:
      ```json
@@ -119,10 +129,13 @@ project-root/
      }
      ```
   5. Send the request.  
-     You should receive a response:  
+     You should receive a response:
      ```json
      { "success": true }
      ```
 
 - **Note:**  
   Both `lat` and `lng` are required in the body. The vehicle ID is provided in the URL path.
+
+---
+
