@@ -48,7 +48,7 @@ model TrackDevice {
   name          String   @unique // can be vehicleNumber
   deviceType    String
   deviceNumber  String
-  shareType     SharingType @default(PRIVATE) // PRIVATE: restricted, PUBLIC: open to all
+  shareType     SharingType // PRIVATE:only allowed permission user, RESTRICTED: see only after search, PUBLIC: open to all
   startLoc      String // only if public
   endLoc        String // only if public
   isActive      Boolean  @default(true)
@@ -58,6 +58,7 @@ model TrackDevice {
 
 enum SharingType {
   PUBLIC
+  RESTRICTED
   PRIVATE
 }
 

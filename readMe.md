@@ -49,18 +49,29 @@ project-root/
 
 ## 🧩 Features & Modules
 
+### ✅ OTP-based User Login API
+
 ### ✅ Authentication
 - OTP-based login using phone number (`POST /user/login/request-otp`).
 - Verifies OTP, issues JWT token (`POST /user/login/verify-otp`).
 
-### ✅ Real-time Tracking
-- Drivers send location (`POST /location/:vehicleId`).
+### ✅ Real-time Tracking - Use Google Geolocation API
+- Drivers share/send location (`POST /location/:vehicleId`).
 - Users stream live updates for 1 or more vehicles (`GET /location/stream?v=1,2,3`).
-- SSE (Server-Sent Events) used for low-latency, push-based streaming.
+~~- SSE (Server-Sent Events) used for low-latency, push-based streaming.~~
+- Public Vehicle:: user can search by location (`GET /vehicle/search?query=...`)  startLoc to endLoc,
+  it returns all vehicles current location live tracking in that range. it only works for public vehicles. it search only active vehicles.
 
-### ✅ Permissions (planned)
+### ✅ Vehicle Management -Search API
+ - Users can search vehicles by name, phoneNumber or vehicleId/deviceNumber (`GET /vehicle/search?query=searchTerm`).
+ - Search supports full matches on vehicle name, phone number, or device number.
+ - Search is applicable to all Vehicle.
+ - 
+
+### ✅ Permissions : Api to manage user permissions for Private vehicles/devices.
 - A user can subscribe to many vehicles.
 - Permissions stored in DB to validate access.
+- Only Private vehicles are required permission to see by other user.
 
 ---
 
