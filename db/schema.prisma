@@ -16,6 +16,8 @@ model User {
   role      Role    @default(NORMAL)
   isVerified  Boolean   @default(false) // Indicates if the user is verified
   isActive    Boolean   @default(true)  // Indicates if the user account is active
+  countryCode String? // mandatory country code for the user
+  City       String?  // mandatory city for the user
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
