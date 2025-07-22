@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-export const findTrackDeviceById = async (deviceId: number) => {
+export const findTrackDeviceById = async (deviceId: string) => {
   console.log('findTrackDeviceById called with:', deviceId);
   return prisma.trackDevice.findUnique({ where: { id: deviceId } });
 };

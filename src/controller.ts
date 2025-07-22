@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as userService from './service/user.service';
 import * as locationService from './service/location.service';
+import * as deviceService from './service/trackDevice.service';
 
 // Handles OTP request by delegating to the user service
 export const requestOtp = async (req: Request, res: Response) => {
@@ -84,19 +85,18 @@ export const addUserDetails = async (req: Request, res: Response) => {
 // Registers a device
 export const registerDevice = async (req: Request, res: Response) => {
   try {
-    const { name, deviceType, deviceNumber, shareType, startLoc, endLoc, owner } = req.body;
-    const device = await userService.registerDevice({
+    const { name, deviceType, deviceNumber, shareType, startLoc, endLoc } = req.body;
+    const device = await deviceService.registerTrackDevice({
       name,
       deviceType,
       deviceNumber,
       shareType,
       startLoc,
-      endLoc,
-      owner,
+      endLoc
     });
     res.status(201).json({ success: true, device });
   } catch (e) {
-    res.status(500).json({ success: false, error: e.message });
+    res.status(500).json({ success: false, error: e });
   }
 };
 
@@ -106,7 +106,7 @@ export const grantPermission = async (req: Request, res: Response) => {
     if (!deviceId || !phone) {
       return res.status(400).json({ success: false, error: 'Device ID and phone are required' });
     }
-    const permission = await userService.grantPermission(deviceId, phone);
+    const permission = await deviceService.grantPermission(deviceId, phone);
     res.status(200).json({ success: true, permission });
   } catch (e) {
     res.status(500).json({ success: false, error: 'Failed to grant permission' });
@@ -115,9 +115,22 @@ export const grantPermission = async (req: Request, res: Response) => {
 
 export const getAllPublicVehicles = async (req: Request, res: Response) => {
   try {
-    const vehicles = await userService.getAllPublicVehicles();
+    const vehicles = await deviceService.getAllPublicTrackDevices();
     res.status(200).json({ success: true, vehicles });
   } catch (e) {
     res.status(500).json({ success: false, error: 'Failed to fetch public vehicles' });
+  }
+};
+
+export const searchVehicle = async (req: Request, res: Response) => {
+  try {
+    const vehicleId = req.query.id as string;
+    if (!vehicleId) {
+      return res.status(400).json({ success: false, error: 'Vehicle ID is required' });
+    }
+    const vehicle = await deviceService.getTrackDeviceById(vehicleId);
+    res.status(200).json({ success: true, vehicle });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to search vehicle' });
   }
 };

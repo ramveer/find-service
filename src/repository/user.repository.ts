@@ -20,7 +20,18 @@ export const upsertUserByPhone = async (phone: string, otp: string) => {
 };
 
 export const findUserByPhone = async (phone: string) => {
-  // Logic to find a user by phone number
+    return prisma.user.findUnique({
+        where: { phone },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            isVerified: true,
+            isActive: true,
+            otp: true, // Assuming OTP is stored in the user model
+        },
+    });
 };
 
 export const clearUserOTP = async (phone: string) => {

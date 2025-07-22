@@ -7,8 +7,7 @@ export const registerTrackDevice = async ({
   deviceNumber,
   shareType,
   startLoc,
-  endLoc,
-  userId,
+  endLoc
 }: {
   name: string;
   deviceType: string;
@@ -16,8 +15,8 @@ export const registerTrackDevice = async ({
   shareType: 'PRIVATE' | 'PUBLIC' | 'RESTRICTED';
   startLoc?: string;
   endLoc?: string;
-  userId: number;
 }) => {
+  const userId = 1; // Placeholder for user ID, replace with actual user ID logic
   console.log('registerTrackDevice called with:', { name, deviceType, deviceNumber, shareType, startLoc, endLoc, userId });
   if (!name || !deviceType || !deviceNumber || !shareType) {
     throw new Error('name, deviceType, deviceNumber, and shareType are required');
@@ -50,7 +49,7 @@ export const updateTrackDevice = async (deviceId: number, data: Partial<{ isActi
   return updatedDevice;
 };
 
-export const getTrackDeviceById = async (deviceId: number) => {
+export const getTrackDeviceById = async (deviceId: string) => {
   console.log('getTrackDeviceById called with:', deviceId);
   const device = await trackDeviceRepo.findTrackDeviceById(deviceId);
   if (!device) {
@@ -66,3 +65,8 @@ export const getAllPublicTrackDevices = async () => {
   });
   return devices;
 };
+
+export function grantPermission(deviceId: any, phone: any) {
+    throw new Error('Function not implemented.');
+}
+
