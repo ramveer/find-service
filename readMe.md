@@ -71,7 +71,7 @@ project-root/
 
 ### Vehicle Management
 
-* **POST /api/vehicle**: Register new vehicles
+* **POST /api/vehicle**: Register new vehicles (any type)
 * **PUT /api/vehicle/\:id**: Update existing vehicle details
 
 ### Real-time Tracking
@@ -102,69 +102,80 @@ project-root/
 
 ---
 
-## API Testing Guide
-
-### 🔁 Real-time Stream Test
-
-**GET /api/location/stream?v=1,2,3**
-
-* SSE: Use browser or JavaScript `EventSource`, not Postman.
-
-### 📡 Send Location
-
-**POST /api/location/\:vehicleId**
-
-```json
-{
-  "lat": 12.9716,
-  "lng": 77.5946
-}
-```
-
-Auth: ✅ Required
-
----
-
 ## API Reference
 
 ### 1. Request OTP
 
-**POST /api/user/login/request-otp**
+**POST /api/user/login/request-otp**  
 Auth: ❌ Public
 
+**Body:**
 ```json
 { "phone": "+919876543210" }
 ```
 
+---
+
 ### 2. Verify OTP
 
-**POST /api/user/login/verify-otp**
+**POST /api/user/login/verify-otp**  
 Auth: ❌ Public
 
+**Body:**
 ```json
 { "phone": "+919876543210", "otp": "123456" }
 ```
 
-Response:
-
+**Response:**
 ```json
 { "token": "JWT_TOKEN" }
 ```
 
+---
+
 ### 3. Update User Profile
 
-**PUT /api/user/profile**
+**PUT /api/user/profile**  
 Auth: ✅ JWT
 
+**Body:**
 ```json
 { "name": "John Doe", "email": "john@example.com" }
 ```
 
-### 4. Register Vehicle
+---
 
-**POST /api/vehicle**
+### 4. Register Vehicle (Any Type)
+
+**POST /api/vehicle**  
 Auth: ✅ JWT
 
+**Body:**
+```json
+{
+  "name": "BUS123",
+  "deviceType": "bus",
+  "deviceNumber": "TN01X1111",
+  "shareType": "PRIVATE", // or "PUBLIC" or "RESTRICTED"
+  "startLoc": "School",   // optional, for public vehicles
+  "endLoc": "Home",       // optional, for public vehicles
+  "owner": "1"            // required if shareType is "PRIVATE"
+}
+```
+
+**Response:**
+```json
+{ "id": 1, "name": "BUS123", "shareType": "PRIVATE", ... }
+```
+
+---
+
+### 5. Update Vehicle
+
+**PUT /api/vehicle/:id**  
+Auth: ✅ JWT
+
+**Body:**
 ```json
 {
   "name": "BUS123",
@@ -176,43 +187,55 @@ Auth: ✅ JWT
 }
 ```
 
-### 5. Update Vehicle
-
-**PUT /api/vehicle/\:id**
-Auth: ✅ JWT
+---
 
 ### 6. Post Location
 
-**POST /api/location/\:vehicleId**
+**POST /api/location/:vehicleId**  
 Auth: ✅ JWT
 
+**Body:**
 ```json
 { "lat": 12.9716, "lng": 77.5946 }
 ```
 
+---
+
 ### 7. Stream Locations
 
-**GET /api/location/stream?v=1,2,3**
+**GET /api/location/stream?v=1,2,3**  
 Auth: ✅ JWT
+
+**Response:**  
+SSE stream of location updates for vehicle IDs 1, 2, and 3.
+
+---
 
 ### 8. Set Tracking Permission
 
-**POST /api/vehicle/\:id/permission**
+**POST /api/vehicle/:id/permission**  
 Auth: ✅ JWT
 
+**Body:**
 ```json
 { "phone": "+919876543210" }
 ```
 
+---
+
 ### 9. Search Vehicles
 
-**GET /api/vehicle/search?query=BUS123**
+**GET /api/vehicle/search?query=BUS123**  
 Auth: ✅ JWT
+
+---
 
 ### 10. Public Vehicle Route Search
 
-**GET /api/public/vehicle/search?startLoc=School\&endLoc=Home**
+**GET /api/public/vehicle/search?startLoc=School&endLoc=Home**  
 Auth: ❌ Public
+
+---
 
 ### 11. Nearby Public Vehicles
 
