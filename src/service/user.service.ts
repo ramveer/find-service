@@ -1,6 +1,8 @@
 import { sendOTP, generateToken } from '../utils/util';
 import * as userRepo from '../repository/user.repository';
 
+// User-related business logic
+
 export const requestOtp = async (phone: string) => {
   console.log('requestOtp called with:', phone);
   const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit OTP
@@ -17,50 +19,6 @@ export const verifyOtp = async (phone: string, otp: string): Promise<string> => 
   return generateToken({ id: user.id, role: user.role }); // Generate JWT token
 };
 
-export const registerPrivateDevice = async ({ deviceId, owner }: { deviceId: string; owner: string }) => {
-  console.log('registerPrivateDevice called with:', { deviceId, owner });
-  if (!deviceId || !owner) {
-    throw new Error('Device ID and owner are required');
-  }
-
-  // Check if the device already exists
-  let existingDevice = await userRepo.findUnique(deviceId);
-  if (existingDevice) {
-    throw new Error('Device already registered');
-  }
-
-  // Create and save the new private device
-  const newDevice = await userRepo.createDevice({
-    data: {
-      name: deviceId,
-      userId: parseInt(owner), // Assuming owner is the user ID
-      shareType: 'PRIVATE',
-      isActive: true,
-    },
-  });
-
-  return newDevice;
-};
-
-export const registerPublicDevice = async ({ deviceId }: { deviceId: string }) => {
-  console.log('registerPublicDevice called with:', { deviceId });
-  if (!deviceId) {
-    throw new Error('Device ID is required');
-  }
-
-  // Create and save the public device
-  const newDevice = await userRepo.createDevice({
-    data: {
-        name: deviceId,
-        shareType: 'PUBLIC',
-        isActive: true,
-        userId: 0
-    },
-  });
-
-  return newDevice;
-};
-
 export const addUserDetails = async (userDetails: { name: string; email: string; phone: string }) => {
   console.log('addUserDetails called with:', userDetails);
   const { name, email, phone } = userDetails;
@@ -72,13 +30,11 @@ export const addUserDetails = async (userDetails: { name: string; email: string;
 
   // Add user details to the database
   const newUser = await userRepo.createUser({
-    data: {
-      name,
-      email,
-      phone,
-      isVerified: false,
-      isActive: true,
-    },
+    name,
+    email,
+    phone,
+    isVerified: false,
+    isActive: true,
   });
 
   return newUser;

@@ -10,39 +10,26 @@ const prisma = new PrismaClient();
   }
 })();
 
-export const upsertUserByPhone = (phone: string, otp: string) => {
+export const upsertUserByPhone = async (phone: string, otp: string) => {
   console.log('upsertUserByPhone called with:', { phone, otp });
   return prisma.user.upsert({
     where: { phone },
     update: { otp },
-    create: { phone, name: '', otp }
+    create: { phone, otp },
   });
 };
 
-export const findUserByPhone = (phone: string) => {
-  console.log('findUserByPhone called with:', phone);
-  return prisma.user.findUnique({ where: { phone } });
+export const findUserByPhone = async (phone: string) => {
+  // Logic to find a user by phone number
 };
 
-export const clearUserOTP = (phone: string) => {
-  console.log('clearUserOTP called with:', phone);
-  return prisma.user.update({ where: { phone }, data: { otp: null } });
+export const clearUserOTP = async (phone: string) => {
+  // Logic to clear OTP for a user
 };
-export function findUnique(arg0: String) {
-    console.log('findUnique called with:', arg0);
-    return prisma.trackDevice.findUnique(arg0);
-}
 
-export function createDevice(arg0: { data: { name: string; userId: number; shareType: string; isActive: boolean; }; }) {
-    console.log('createDevice called with:', arg0);
-    return prisma.trackDevice.create(arg0);
-}
-
-export function createUser(arg0: { data: { name: string; email: string; phone: string; isVerified: boolean; isActive: boolean; }; }) {
-   console.log('createUser called with:', arg0);
-   return prisma.user.create(arg0);
-}
-
+export const createUser = async (data: { name: string; email: string; phone: string; isVerified: boolean; isActive: boolean }) => {
+  // Logic to create a new user in the database
+};
 
 export function createOtp(arg0: { data: { userId: number; otp: string; type: "LOGIN" | "PASSWORD_RESET"; expiresAt: Date; }; }) {
     console.log('createOtp called with:', arg0);

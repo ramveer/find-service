@@ -81,23 +81,43 @@ export const addUserDetails = async (req: Request, res: Response) => {
   }
 };
 
-// Registers a device as private or public
+// Registers a device
 export const registerDevice = async (req: Request, res: Response) => {
   try {
-    const { deviceId, type, owner } = req.body; // `type` can be 'private' or 'public'
-    if (!deviceId || !type) {
-      return res.status(400).json({ success: false, error: 'Device ID and type are required' });
-    }
-    if (type === 'private') {
-      const device = await userService.registerPrivateDevice({ deviceId, owner });
-      res.status(201).json({ success: true, device });
-    } else if (type === 'public') {
-      const device = await userService.registerPublicDevice({ deviceId });
-      res.status(201).json({ success: true, device });
-    } else {
-      res.status(400).json({ success: false, error: 'Invalid device type' });
-    }
+    const { name, deviceType, deviceNumber, shareType, startLoc, endLoc, owner } = req.body;
+    const device = await userService.registerDevice({
+      name,
+      deviceType,
+      deviceNumber,
+      shareType,
+      startLoc,
+      endLoc,
+      owner,
+    });
+    res.status(201).json({ success: true, device });
   } catch (e) {
-    res.status(500).json({ success: false, error: 'Failed to register device' });
+    res.status(500).json({ success: false, error: e.message });
+  }
+};
+
+export const grantPermission = async (req: Request, res: Response) => {
+  try {
+    const { deviceId, phone } = req.body;
+    if (!deviceId || !phone) {
+      return res.status(400).json({ success: false, error: 'Device ID and phone are required' });
+    }
+    const permission = await userService.grantPermission(deviceId, phone);
+    res.status(200).json({ success: true, permission });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to grant permission' });
+  }
+};
+
+export const getAllPublicVehicles = async (req: Request, res: Response) => {
+  try {
+    const vehicles = await userService.getAllPublicVehicles();
+    res.status(200).json({ success: true, vehicles });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to fetch public vehicles' });
   }
 };
